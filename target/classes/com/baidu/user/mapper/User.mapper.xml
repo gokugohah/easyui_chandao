@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.baidu.user.dao.UserDAO">
+	
+	
+	<select id="login" parameterType="com.baidu.user.entity.User" resultType="com.baidu.user.entity.User">
+		select * from t_user where name=#{name} and pwd=#{pwd}
+	</select>
+	
+	<select id="list" resultType="com.baidu.user.entity.User">
+		select u.*,d.name deptName from t_user u left join t_dept d on u.deptId=d.id order by u.id
+	</select>
+	<!-- Oracle批量添加 -->
+	<insert id="addAll" parameterType="list">
+		insert into t_user (id,realname,name,pwd,sex,mail,tel,add_date,deptId)
+		select userseq.nextval,a.* from (
+		<foreach collection="list" item="item" index="index" separator="union">   
+	        select  #{item.realname},#{item.name},#{item.pwd},#{item.sex},
+	        		#{item.mail},#{item.tel},#{item.add_date},#{item.deptId} from dual
+	    </foreach> ) a
+	</insert>
+	<!-- Oracle批量修改 -->
+	<update id="updateAll" parameterType="list">
+		begin 
+		<foreach collection="list" item="item" index="index" separator=";"> 
+			update t_user 
+			<set>
+				realname=#{item.realname},name=#{item.name},pwd=#{item.pwd},sex=#{item.sex},
+				mail=#{item.mail},tel=#{item.tel},add_date=#{item.add_date},deptId=#{item.deptId}
+			</set>  
+	        where id=#{item.id}
+	    </foreach>
+	    ;end;
+	</update>
+	
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.baidu.upload.dao.ImageDAO">
+	
+	<select id="list" resultType="Image">
+		select * from t_reqimg order by id
+	</select>
+	
+	<select id="findId" resultType="int">
+		SELECT reqimgseq.nextval FROM DUAL
+	</select>
+	
+	<insert id="create" parameterType="Image">
+		insert into t_reqimg(id,name,url,reqid,imgblob) values(${id},#{name},#{url},#{reqid},#{imgblob,jdbcType=BLOB})
+	</insert>
+	
+	<select id="get" parameterType="int" resultType="Image">
+		select * from t_reqimg where id=${value}
+	</select>
+	
+	<delete id="delete" parameterType="int">
+		delete from t_reqimg where id=${value}
+	</delete>
+	
+</mapper>

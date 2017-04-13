@@ -1,0 +1,23 @@
+#163 mail server
+mail.transport.protocol=smtp
+mail.smtp.host=smtp.163.com
+mail.smtp.port=25
+mail.smtp.from=15978594758@163.com
+mail.smtp.user=15978594758@163.com
+mail.smtp.password=lili85
+mail.smtp.auth=true
+mail.debug=true
+
+
+
+
+
+#QQ mail server
+#mail.transport.protocol=smtp
+#mail.smtp.host=smtp.qq.com
+#mail.smtp.port=587
+#mail.smtp.from=1270628084@qq.com
+#mail.smtp.user=1270628084@qq.com
+#mail.smtp.password=mrfmfywsfzzyhfcd
+#mail.smtp.auth=true
+#mail.debug=true

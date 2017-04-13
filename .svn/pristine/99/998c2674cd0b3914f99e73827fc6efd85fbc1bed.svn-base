@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.baidu.product.dao.ProductDAO">
+
+	<resultMap type="ProductRequire" id="prMap">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="examuser" property="examuser"/>
+		<result column="prolevel" property="prolevel"/>
+		<result column="content" property="content"/>
+		<result column="tousers" property="tousers"/>
+		<result column="proid" property="proid"/>
+		<result column="proname" property="proname"/>
+		<result column="modelid" property="modelid"/>
+		<result column="modelname" property="modelname"/>
+		<result column="planid" property="planid"/>
+		<result column="planname" property="planname"/>
+		<result column="fromid" property="fromid"/>
+		<result column="fromname" property="fromname"/>
+		<collection property="images" ofType="com.baidu.upload.entity.Image">
+			<id column="imgid" property="id"/>
+			<result column="imgname" property="name"/>
+		</collection>
+	</resultMap>
+	<!-- 产品列表 -->
+	<select id="list" resultType="Product">
+		select p.*,u1.realname pro_userName,u2.realname test_userName,u3.realname pub_userName,t.name pro_typeName,p.content from t_product p 
+			left join t_user u1 on p.pro_userid=u1.id
+			left join t_user u2 on p.test_userid=u2.id
+			left join t_user u3 on p.pub_userid=u3.id
+			left join t_protype t on p.pro_typeid=t.id
+			order by p.id
+	</select>
+	<!-- 添加产品 -->
+	<insert id="add" parameterType="Product">
+		insert into t_product(id,name,version,pro_userId,test_userId,pub_userId,pro_typeId,content) values(
+			proseq.nextval,#{name},#{version},
+			${pro_userId},${test_userId},${pub_userId},${pro_typeId},
+			#{content}
+		)
+	</insert>
+	<!-- 修改产品 -->
+	<update id="update" parameterType="Product">
+		update t_product set name=#{name},version=#{version},pro_userId=${pro_userId},
+			test_userId=${test_userId},pub_userId=${pub_userId},pro_typeId=${pro_typeId},
+			content=#{content} where id=${id}
+	</update>
+	<!-- 
+		获取一个部门和员工的集合，属性有id，name，pId，用于zTree接收数据；
+		union all:将两个查询结果连接起来显示，后面的表显示字段以第一个表为准，且数据类型一致，允许重复id；
+		union:将两个查询结果连接起来，自动去掉重复的id；
+		'dept_'||id:给查询结果拼接字符串，要求id必须是varchar，如dept_1；
+		decode('dept_'||pid,'dept_0','0','dept_'||pid):因为zTree默认的根节点id为0，部门作为根节点就不能是dept_0，需要用decode转换一下；
+	 -->
+	<select id="userList" resultType="Znotes">
+		select 'dept_'||id id, name, decode('dept_'||pid,'dept_0','0','dept_'||pid) pid from t_dept 
+		union all 
+		select to_char(id),realname name,'dept_'||deptId pid from t_user
+	</select>
+	<!-- 自动补全 -->
+	<select id="userAll" parameterType="string" resultType="AutoComplete">
+		select id,realname "label",realname "value" from t_user
+	</select>
+	<!-- 产品类型列表 -->
+	<select id="protypeList" resultType="ProType">
+		select * from t_protype order by id
+	</select>
+	<!-- 需求模块列表 -->
+	<select id="modelList" parameterType="ProductModel" resultType="ProductModel">
+		select * from t_promodel
+		<if test="proid!=null">
+			 where proid=${proid}
+		</if> order by id
+	</select>
+	<!-- 需求计划列表 -->
+	<select id="planList" parameterType="ProductPlan" resultType="ProductPlan">
+		select * from t_proplan 
+		<if test="proid!=null">
+			 where proid=${proid}
+		</if> order by id
+	</select>
+	<!-- 需求来源列表 -->
+	<select id="fromList" parameterType="ProductFrom" resultType="ProductFrom">
+		select * from t_profrom order by id
+	</select>
+	<!-- 添加需求 -->
+	<insert id="addRequire" parameterType="ProductRequire">
+		<selectKey resultType="java.lang.Integer" order="BEFORE" keyProperty="id">  
+	       SELECT prorequireseq.nextval as ID from DUAL  
+	   </selectKey>
+		insert into t_prorequire(id,name,examuser,prolevel,content,proid,modelid,planid,fromid,tousers) values(
+			#{id},#{name},#{examuser},
+			#{prolevel},#{content},
+			${proid},${modelid},${planid},${fromid},#{tousers}
+		)
+	</insert>
+	<!-- 需求列表 -->
+	<select id="requireList" resultMap="prMap">
+		select req.*,img.id imgid,img.name imgname,pro.name proName,mo.name modelName,pla.name planName,fro.name fromName from t_prorequire req
+	    left join t_product pro on req.proid=pro.id
+	    left join t_promodel mo on req.modelid=mo.id
+	    left join t_proplan pla on req.planid=pla.id
+	    left join t_profrom fro on req.fromid=fro.id
+	    left join t_reqimg img on req.id=img.reqid
+	     order by req.id
+	</select>
+	<!-- 通过tousers获取抄送人的realname -->
+	<select id="toUserName" parameterType="string" resultType="string">
+		select wm_concat(realname) from t_user where id in (${value})
+	</select>
+	
+	<!-- 通过id获得需求 -->
+	<select id="findRequire" parameterType="integer" resultMap="prMap">
+		select p.*,i.name imgname from t_prorequire p left join t_reqimg i on p.id=i.reqid where p.id=#{reqid}
+	</select>
+	<!-- 获取发送邮件的用户列表 -->
+	<select id="findToUsers" parameterType="string" resultType="User">
+		select * from t_user where id in (${value})
+	</select>
+	<!-- 通用统计图 -->
+	<select id="charts" parameterType="map" resultType="Charts">
+		select a.name "label",a.name "name",b.count "value" from ${tablename} a
+		right join (select ${chartid},count(1) count from t_prorequire group by ${chartid}) b
+		on a.id=b.${chartid}
+	</select>
+	<!-- 优先级统计图 -->
+	<select id="prolevelCharts" resultType="Charts">
+		select '优先级别'||prolevel "name",count(1) "value" from t_prorequire group by prolevel
+	</select>
+</mapper>

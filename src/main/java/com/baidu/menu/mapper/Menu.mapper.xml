@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.baidu.menu.dao.MenuDAO">
+	
+	<select id="list" resultType="com.baidu.menu.entity.Menu">
+		select m1.*,m2.name parentName,i.iconcls from (select rownum rn,m.* from t_menu m) m1 
+	    left join t_menu m2 on m1.pid=m2.id 
+	    left join t_icon i on m1.iconid=i.iconid order by m1.id
+	</select>
+	
+	<select id="total" resultType="int">
+		select count(1) from t_menu
+	</select>
+	
+	<select id="listAll" parameterType="map" resultType="com.baidu.menu.entity.Menu">
+		select m1.*,m2.name parentName,i.iconcls from (select rownum rn,m.* from t_menu m) m1 
+	    left join t_menu m2 on m1.pid=m2.id 
+	    left join t_icon i on m1.iconid=i.iconid 
+	    where 
+	    <![CDATA[rn>=#{start} and rn<=#{end} order by m1.id]]>
+	</select>
+	
+	<insert id="add" parameterType="com.baidu.menu.entity.Menu">
+		insert into t_menu values(menuseq.nextval,#{name},${pid},#{url},${orderby},${iconId})
+	</insert>
+	
+	<insert id="update" parameterType="com.baidu.menu.entity.Menu">
+		update t_menu set name=#{name},pid=${pid},url=#{url},orderby=${orderby},iconId=${iconId} where id=${id}
+	</insert>
+	
+	<select id="iconList" resultType="com.baidu.menu.entity.Menu">
+		select * from t_icon
+	</select>
+	
+	<select id="delete" resultType="string">
+		delete from t_menu where id in (${value})
+	</select>
+	
+</mapper>

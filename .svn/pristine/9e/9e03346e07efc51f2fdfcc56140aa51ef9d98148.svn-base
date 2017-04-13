@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.baidu.power.dao.PowerDAO">
+	
+	<select id="list" resultType="com.baidu.power.entity.Power">
+		<!-- select * from t_power where pid=0 order by id -->
+		select * from t_power order by id<!-- 使用syUtil.js -->
+	</select>
+	<!-- 使用递归 -->
+	<select id="findChildren" parameterType="integer" resultType="com.baidu.power.entity.Power">
+		select * from t_power where pid=#{id}
+	</select>
+</mapper>

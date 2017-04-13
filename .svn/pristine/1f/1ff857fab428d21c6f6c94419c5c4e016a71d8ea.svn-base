@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="easyui_chandao"
+  id="myeclipse.1480399267775"
+  context-root="/easyui_chandao"
+  j2ee-spec="6.0"
+  archive="easyui_chandao.war">
+  <attributes>
+    <attribute name="webrootdir" value="src/main/webapp" />
+  </attributes>
+</project-module>
+
